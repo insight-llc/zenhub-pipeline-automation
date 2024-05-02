@@ -1,0 +1,21 @@
+name: 'Zenhub Pipeline Automation'
+description: 'Automate moving ZenHub cards between pipelines based on Github issue or pull request status.'
+inputs:
+  zenhub-repository-id:
+    description: 'Repository ID in ZenHub.'
+    required: true
+  zenhub-graphql-personal-api-key:
+    description: 'ZenHub API token.'
+    required: true
+  zenhub-workspace:
+    description: 'ZenHub workspace name.'
+    required: true
+# outputs:
+#   time: # id of output
+#     description: 'The time we greeted you'
+runs:
+  using: 'node20'
+  main: 'index.js'
+branding:
+  icon: star
+  color: blue
