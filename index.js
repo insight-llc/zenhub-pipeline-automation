@@ -1,8 +1,77 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const zenhubApiEndpoint = "https://api.zenhub.com/public/graphql";
+const { graphql } = require("@octokit/graphql");
+
+const graphqlWithAuth = graphql.defaults({
+    baseUrl: "https://api.zenhub.com/public/graphql",
+    headers: {
+        authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
+    },
+});
+
+async function getWorkspaces() {
+    const variables = {
+        workspace: core.getInput("zenhub-workspace"),
+    };
+    const query = `
+        query {
+            viewer {
+                id
+                searchWorkspaces(query: "$workspace") {
+                nodes {
+                        id
+                        name
+                    repositoriesConnection {
+                        nodes {
+                                id
+                                name
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `;
+
+    return await graphqlWithAuth(query, variables);
+}
+
+async function reviewRequiresChanges(workspaceId) {
+    const variables = {
+        workspace: core.getInput("zenhub-workspace"),
+    };
+    const query = `
+        query {
+            viewer {
+                id
+                searchWorkspaces(query: "$workspace") {
+                nodes {
+                        id
+                        name
+                    repositoriesConnection {
+                        nodes {
+                                id
+                                name
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `;
+
+    return await graphqlWithAuth(query, variables);
+};
 
 try {
+    getWorkspaces()
+        .then((result) => {
+            return reviewRequiresChanges(result.id);
+            console.log(result);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
     // `who-to-greet` input defined in action metadata file
     const nameToGreet = core.getInput('who-to-greet');
     console.log(`Hello ${nameToGreet}!`);
@@ -16,23 +85,6 @@ try {
 }
 
 const getWorkspaces = function () {
-query {
-        viewer {
-        id
-        searchWorkspaces(query: "WORKSPACE_NAME") {
-              nodes {
-                id
-                name
-                  repositoriesConnection {
-                      nodes {
-                        id
-                        name
-                    }
-                }
-            }
-        }
-    }
-};
 
-return 'workspaceId';
+    return 'workspaceId';
 }
