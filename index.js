@@ -1,7 +1,6 @@
 let graphql;
 const core = require("@actions/core");
 const github = require("@actions/github");
-import { graphql } from "@octokit/graphql";
 
 import("@octokit/graphql")
     .then((octokit) => {
