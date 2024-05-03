@@ -1,6 +1,13 @@
+let graphql;
 const core = require("@actions/core");
 const github = require("@actions/github");
 import { graphql } from "@octokit/graphql";
+
+import("@octokit/graphql")
+    .then((octokit) => {
+        graphql = octokit.graphql;
+        process();
+    });
 
 const graphqlWithAuth = graphql.defaults({
     baseUrl: "https://api.zenhub.com/public/graphql",
@@ -94,26 +101,28 @@ async function moveToPipeline(pipeline) {
     return await graphqlWithAuth(query, variables);
 };
 
-try {
-    const workspaces = getWorkspaces();
+async function process() {
+    try {
+        const workspaces = getWorkspaces();
 
-    if (workspaces.length === 0) {
-        core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
-    }
-
-    for (const workspace of workspaces) {
-        const pullRequestState = (payload.review || {}).state || "";
-        const pipeline = getConfiguredPipeline(workspace, pullRequestState);
-
-        if (! pipeline) {
-            continue;
+        if (workspaces.length === 0) {
+            core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
         }
 
-        moveToPipeline(workspace, pipeline);
-    }
+        for (const workspace of workspaces) {
+            const pullRequestState = (payload.review || {}).state || "";
+            const pipeline = getConfiguredPipeline(workspace, pullRequestState);
 
-    const payload = JSON.stringify(github.context.payload, undefined, 2)
-    console.log(`The event payload: ${payload}`);
-} catch (error) {
-    core.setFailed(error.message);
+            if (! pipeline) {
+                continue;
+            }
+
+            moveToPipeline(workspace, pipeline);
+        }
+
+        const payload = JSON.stringify(github.context.payload, undefined, 2)
+        console.log(`The event payload: ${payload}`);
+    } catch (error) {
+        core.setFailed(error.message);
+    }
 }
