@@ -14,7 +14,6 @@ import("@octokit/graphql")
                 authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
             },
         });
-console.log(payload);
         process();
     });
 
@@ -45,7 +44,11 @@ async function getPipelines(workspaceId) {
         }
     `;
 
-    return await graphqlWithAuth(query, variables);
+    const result = await graphqlWithAuth(query, variables);
+console.log(result);
+    return result.workspace
+        .pipelines
+        .nodes;
 }
 
 async function getWorkspaces() {
