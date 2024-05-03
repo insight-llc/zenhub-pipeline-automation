@@ -1,6 +1,10 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-const { graphql } = require("@octokit/graphql");
+let graphql;
+
+import("@octokit/graphql").then((octokit) => {
+    graphql = octokit.graphql;
+});
 
 const graphqlWithAuth = graphql.defaults({
     baseUrl: "https://api.zenhub.com/public/graphql",
