@@ -67,11 +67,8 @@ async function getWorkspaces() {
             }
         }
     `;
-
     const result = await graphqlWithAuth(query);
-    console.log("test", result.viewer
-        .searchWorkspaces
-        .nodes);
+
     return result.viewer
         .searchWorkspaces
         .nodes;
@@ -103,7 +100,7 @@ async function moveToPipeline(pipeline) {
 async function process() {
     try {
         const workspaces = getWorkspaces();
-
+console.log("test", workspaces);
         if (workspaces.length === 0) {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
         }
