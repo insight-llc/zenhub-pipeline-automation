@@ -70,7 +70,7 @@ async function getWorkspaces() {
             }
         }
     `;
-
+console.log(graphqlWithAuth(query, variables));
     return await graphqlWithAuth(query, variables)
         .data
         .viewer
