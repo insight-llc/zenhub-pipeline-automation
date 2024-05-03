@@ -18,7 +18,7 @@ import("@octokit/graphql")
     });
 
 async function getConfiguredPipeline(workspace) {
-    console.log("input", typeof core.getInput("pull-request-state-mapping"), core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
+    console.log("input", typeof core.getInput("pull-request-state-mapping"), JSON.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, '')));
     const mapping = core.getInput("pull-request-state-mapping");
     console.log("Mapping keys: ", Object.keys(mapping));
     console.log("Mapping values: ", Object.values(mapping));
