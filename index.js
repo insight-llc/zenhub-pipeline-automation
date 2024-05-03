@@ -48,9 +48,6 @@ async function getPipelines(workspaceId) {
 }
 
 async function getWorkspaces() {
-    const variables = {
-        workspace: core.getInput("zenhub-workspace"),
-    };
     const query = `
         query {
             viewer {
@@ -70,9 +67,9 @@ async function getWorkspaces() {
             }
         }
     `;
-console.log(query, await graphqlWithAuth(query));
+
     const result = await graphqlWithAuth(query);
-    console.log(result.viewer
+    console.log("test", result.viewer
         .searchWorkspaces
         .nodes);
     return result.viewer
