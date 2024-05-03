@@ -1,5 +1,6 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
+const JSON5 = require("json5");
 
 let payload = github.context.payload;
 let graphql;
@@ -20,9 +21,7 @@ import("@octokit/graphql")
 async function getConfiguredPipeline(workspace) {
     console.log("input", typeof core.getInput("pull-request-state-mapping"), core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
     const mapping = core.getInput("pull-request-state-mapping");
-    console.log("Mapping keys: ", Object.keys(mapping));
-    console.log("Mapping values: ", Object.values(mapping));
-    mapping = JSON.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
+    mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
     console.log("pullRequestState", payload.pull_request.state, mapping, typeof mapping);
     const configuredPipeline = mapping[payload.pull_request.state];
     const pipelines = await getPipelines(workspace.id);
