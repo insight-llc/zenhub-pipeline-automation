@@ -1,5 +1,6 @@
 let graphql;
 let graphqlWithAuth;
+const payload = github.context.payload;
 const core = require("@actions/core");
 const github = require("@actions/github");
 
@@ -14,8 +15,6 @@ import("@octokit/graphql")
         });
         process();
     });
-
-const payload = github.context.payload;
 
 function getConfiguredPipeline(workspace, pullRequestState) {
     const configuredPipeline = core.getInput("zenhub-pipeline")[pullRequestState];
@@ -100,7 +99,7 @@ async function moveToPipeline(pipeline) {
 async function process() {
     try {
         const workspaces = await getWorkspaces();
-console.log("test", workspaces);
+
         if (workspaces.length === 0) {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
         }
