@@ -17,10 +17,10 @@ import("@octokit/graphql")
         process();
     });
 
-function getConfiguredPipeline(workspace, pullRequestState) {
+async function getConfiguredPipeline(workspace, pullRequestState) {
     const configuredPipeline = core.getInput("zenhub-pipeline")[pullRequestState];
     console.log(workspace);
-    const pipelines = getPipelines(workspace.id);
+    const pipelines = await getPipelines(workspace.id);
     console.log(pipelines);
     const pipeline = pipelines
         .find(function (workspacePipeline) {
@@ -111,7 +111,7 @@ async function process() {
 
         for (const workspace of workspaces) {
             const pullRequestState = (payload.review || {}).state || "";
-            const pipeline = getConfiguredPipeline(workspace, pullRequestState);
+            const pipeline = await getConfiguredPipeline(workspace, pullRequestState);
 
             if (! pipeline) {
                 continue;
