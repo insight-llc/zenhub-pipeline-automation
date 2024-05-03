@@ -7,7 +7,6 @@ let payload;
 
 import("@octokit/graphql")
     .then((octokit) => {
-        payload = github.context.payload;
         graphql = octokit.graphql;
         graphqlWithAuth = graphql.defaults({
             baseUrl: "https://api.zenhub.com/public",
@@ -15,6 +14,7 @@ import("@octokit/graphql")
                 authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
             },
         });
+        payload = github.context.payload;
         process();
     });
 
