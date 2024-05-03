@@ -18,8 +18,8 @@ import("@octokit/graphql")
     });
 
 async function getConfiguredPipeline(workspace, pullRequestState) {
-    console.log("pullRequestState", core.getInput("zenhub-pipeline"), pullRequestState);
-    const configuredPipeline = core.getInput("zenhub-pipeline")[pullRequestState];
+    console.log("pullRequestState", core.getInput("pull-request-state-mapping"), pullRequestState);
+    const configuredPipeline = core.getInput("pull-request-state-mapping")[pullRequestState];
     const pipelines = await getPipelines(workspace.id);
     console.log("pipelines", pipelines);
     const pipeline = pipelines
