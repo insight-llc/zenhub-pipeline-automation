@@ -1,9 +1,9 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
 
+let payload = github.context.payload;
 let graphql;
 let graphqlWithAuth;
-let payload;
 
 import("@octokit/graphql")
     .then((octokit) => {
@@ -14,7 +14,7 @@ import("@octokit/graphql")
                 authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
             },
         });
-        payload = github.context.payload;
+console.log(payload);
         process();
     });
 
