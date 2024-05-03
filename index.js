@@ -72,7 +72,9 @@ async function getWorkspaces() {
     `;
 console.log(query, await graphqlWithAuth(query));
     const result = await graphqlWithAuth(query);
-    console.log(result);
+    console.log(result.viewer
+        .searchWorkspaces
+        .nodes);
     return result.viewer
         .searchWorkspaces
         .nodes;
