@@ -19,7 +19,7 @@ import("@octokit/graphql")
 
 async function getConfiguredPipeline(workspace, pullRequestState) {
     console.log("pullRequestState", core.getInput("pull-request-state-mapping"), pullRequestState);
-    const configuredPipeline = core.getInput("pull-request-state-mapping")[pullRequestState];
+    const configuredPipeline = core.getInput("pull-request-state-mapping").pullRequestState;
     const pipelines = await getPipelines(workspace.id);
     console.log("pipelines", pipelines);
     const pipeline = pipelines
@@ -112,6 +112,7 @@ async function process() {
 
         for (const workspace of workspaces) {
             const pullRequestState = (payload.review || {}).state || "";
+            console.log(payload);
             const pipeline = await getConfiguredPipeline(workspace, pullRequestState);
 console.log(pipeline);
             if (! pipeline) {
