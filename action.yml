@@ -1,18 +1,24 @@
-name: 'Zenhub Pipeline Automation'
-description: 'Automate moving ZenHub cards between pipelines based on Github issue or pull request status.'
+name: "Zenhub Pipeline Automation"
+description: "Automate moving ZenHub cards between pipelines based on Github issue or pull request status."
 inputs:
   zenhub-graphql-personal-api-key:
-    description: 'ZenHub API token.'
+    description: "ZenHub API token."
     required: true
   zenhub-workspace:
-    description: 'ZenHub workspace name.'
+    description: "ZenHub workspace name."
     required: true
-# outputs:
-#   time: # id of output
-#     description: 'The time we greeted you'
+  pull-request-state-mapping:
+    description: "Provide a mapping between Pull Request status and the corresponding ZenHub Pipeline you want to move the issue to. Possible statuses are: open, closed, merged, commented, changes_requested, approved, dismissed."
+    required: true
+    default: "merged: 'Closed'"
+outputs:
+  pull-request-id:
+    description: "The ID of the pull request that has been moved."
+  pipeline:
+    description: "The name of the ZenHub pipeline that the pull request was moved to."
 runs:
-  using: 'node20'
-  main: 'index.js'
+  using: "node20"
+  main: "index.js"
 branding:
   icon: star
   color: blue
