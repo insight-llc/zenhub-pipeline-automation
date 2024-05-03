@@ -55,7 +55,7 @@ async function getWorkspaces() {
         query {
             viewer {
                 id
-                searchWorkspaces(query: "${workspace}") {
+                searchWorkspaces(query: "${core.getInput("zenhub-workspace")}") {
                 nodes {
                     id
                     name
