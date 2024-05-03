@@ -1,11 +1,13 @@
-let graphql;
-let graphqlWithAuth;
 const core = require("@actions/core");
 const github = require("@actions/github");
-const payload = github.context.payload;
+
+let graphql;
+let graphqlWithAuth;
+let payload;
 
 import("@octokit/graphql")
     .then((octokit) => {
+        payload = github.context.payload;
         graphql = octokit.graphql;
         graphqlWithAuth = graphql.defaults({
             baseUrl: "https://api.zenhub.com/public",
