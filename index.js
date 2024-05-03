@@ -19,9 +19,7 @@ import("@octokit/graphql")
 
 async function getConfiguredPipeline(workspace, pullRequestState) {
     const configuredPipeline = core.getInput("zenhub-pipeline")[pullRequestState];
-    console.log(workspace);
     const pipelines = await getPipelines(workspace.id);
-    console.log(pipelines);
     const pipeline = pipelines
         .find(function (workspacePipeline) {
             return workspacePipeline.name === configuredPipeline;
@@ -45,7 +43,7 @@ async function getPipelines(workspaceId) {
         }
     `;
     const result = await graphqlWithAuth(query, variables);
-console.log(result);
+
     return result
         .workspace
         .pipelines;
@@ -118,6 +116,10 @@ async function process() {
             }
 
             moveToPipeline(workspace, pipeline);
+
+            core.setOutput("pull-request-id", payload.id);
+            core.setOutput("pipeline", pipeline.name);
+            console.log(`Moved pull request #${payload.id} to pipeline "${pipeline.name}" in workspace "${workspace.name}".`);
         }
     } catch (error) {
         core.setFailed(error.message);
