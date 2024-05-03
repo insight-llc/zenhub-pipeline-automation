@@ -36,15 +36,12 @@ async function getPipelines(workspaceId) {
         query ($workspaceId: ID!) {
             workspace(id: $workspaceId) {
                 pipelines {
-                    nodes {
-                        id
-                        name
-                    }
+                    id
+                    name
                 }
             }
         }
     `;
-
     const result = await graphqlWithAuth(query, variables);
 console.log(result);
     return result.workspace
