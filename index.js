@@ -1,8 +1,8 @@
 let graphql;
 let graphqlWithAuth;
-const payload = github.context.payload;
 const core = require("@actions/core");
 const github = require("@actions/github");
+const payload = github.context.payload;
 
 import("@octokit/graphql")
     .then((octokit) => {
