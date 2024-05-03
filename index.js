@@ -1,19 +1,20 @@
 let graphql;
+let graphqlWithAuth;
 const core = require("@actions/core");
 const github = require("@actions/github");
 
 import("@octokit/graphql")
     .then((octokit) => {
         graphql = octokit.graphql;
+        graphqlWithAuth = graphql.defaults({
+            baseUrl: "https://api.zenhub.com/public/graphql",
+            headers: {
+                authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
+            },
+        });
         process();
     });
 
-const graphqlWithAuth = graphql.defaults({
-    baseUrl: "https://api.zenhub.com/public/graphql",
-    headers: {
-        authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
-    },
-});
 const payload = github.context.payload;
 
 function getConfiguredPipeline(workspace, pullRequestState) {
