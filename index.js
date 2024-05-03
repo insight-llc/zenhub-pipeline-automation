@@ -99,7 +99,7 @@ async function moveToPipeline(pipeline) {
 
 async function process() {
     try {
-        const workspaces = getWorkspaces();
+        const workspaces = await getWorkspaces();
 console.log("test", workspaces);
         if (workspaces.length === 0) {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
