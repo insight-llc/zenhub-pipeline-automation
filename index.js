@@ -71,8 +71,9 @@ async function getWorkspaces() {
         }
     `;
 console.log(query, await graphqlWithAuth(query));
-    return await graphqlWithAuth(query)
-        .viewer
+    const result = await graphqlWithAuth(query);
+    console.log(result);
+    return result.viewer
         .searchWorkspaces
         .nodes;
 }
