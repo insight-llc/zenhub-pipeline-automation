@@ -57,8 +57,8 @@ async function getWorkspaces() {
                 id
                 searchWorkspaces(query: "$workspace") {
                 nodes {
-                        id
-                        name
+                    id
+                    name
                     repositoriesConnection {
                         nodes {
                                 id
@@ -70,7 +70,7 @@ async function getWorkspaces() {
             }
         }
     `;
-console.log(await graphqlWithAuth(query, variables));
+console.log(query, await graphqlWithAuth(query, variables));
     return await graphqlWithAuth(query, variables)
         .data
         .viewer
