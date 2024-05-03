@@ -110,7 +110,7 @@ async function process() {
         for (const workspace of workspaces) {
             const pullRequestState = (payload.review || {}).state || "";
             const pipeline = await getConfiguredPipeline(workspace, pullRequestState);
-
+console.log(pipeline);
             if (! pipeline) {
                 continue;
             }
