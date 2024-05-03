@@ -22,7 +22,7 @@ async function getConfiguredPipeline(workspace) {
     const mapping = core.getInput("pull-request-state-mapping");
     console.log("Mapping keys: ", Object.keys(mapping));
     console.log("Mapping values: ", Object.values(mapping));
-    mapping = JSON.parse(core.getInput("pull-request-state-mapping"));
+    mapping = JSON.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
     console.log("pullRequestState", payload.pull_request.state, mapping, typeof mapping);
     const configuredPipeline = mapping[payload.pull_request.state];
     const pipelines = await getPipelines(workspace.id);
