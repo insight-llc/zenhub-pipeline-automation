@@ -82,7 +82,7 @@ async function getWorkspaces() {
 
 async function moveToPipeline(pipeline) {
     const variables = {
-        issueId: payload.issue.id,
+        issueId: payload.pull_request.id,
         pipeline: pipeline.id,
         position: "top",
     };
