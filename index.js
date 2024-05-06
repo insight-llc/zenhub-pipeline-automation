@@ -53,10 +53,7 @@ function getMappedPipeline(pipelines) {
         }, undefined)
         .value();
 
-    return pipeline
-        && _.has(pipelines, pipeline)
-        ? pipeline
-        : undefined;
+    return _.find(pipelines, {"name": pipeline});
 }
 
 async function getIssue() {
