@@ -1,4 +1,4 @@
-# Hello world javascript action
+# ZenHub Pipeline Automation Action
 
 This action sets up automatic issue movement between different ZenHub Pipelines depending on what's happening with the PR.
 
