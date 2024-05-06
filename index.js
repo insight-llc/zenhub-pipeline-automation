@@ -30,7 +30,7 @@ async function getConfiguredPipeline(workspace) {
     return pipeline;
 }
 
-async function getIssueId() {
+async function getIssue() {
     const variables = {
         "issueNumber": payload.pull_request.number,
         "repositoryGhId": payload.repository.id,
@@ -39,14 +39,32 @@ async function getIssueId() {
         query ($repositoryGhId: Int, $issueNumber: Int!) {
             issueByInfo(issueNumber: $issueNumber, repositoryGhId: $repositoryGhId) {
                 id
+                pipelineIssues {
+                    edges {
+                        node {
+                            pipeline {
+                                id
+                                name
+                            }
+                        }
+                    }
+                }
             }
         }
     `;
     const result = await graphqlWithAuth(query, variables);
-console.log("issue:", result);
-    return result
-        .issueByInfo
-        .id;
+
+    return {
+        "id": result
+            .issueByInfo
+            .id,
+        "pipeline": result
+            .issueByInfo
+            .pipelineIssues
+            .edges[0]
+            .node
+            .pipeline,
+    };
 }
 
 async function getPipelines(workspaceId) {
@@ -64,7 +82,7 @@ async function getPipelines(workspaceId) {
         }
     `;
     const result = await graphqlWithAuth(query, variables);
-console.log("workspace:", result);
+
     return result
         .workspace
         .pipelines;
@@ -91,46 +109,45 @@ async function getWorkspaces() {
         }
     `;
     const result = await graphqlWithAuth(query);
-console.log("workspaces:", result);
+
     return result
         .viewer
         .searchWorkspaces
         .nodes;
 }
 
-async function moveToPipeline(pipeline) {
+async function moveIssueToPipeline(issue, pipeline) {
     const variables = {
         input: {
             clientMutationId: "test",
-            issueId: await getIssueId(),
+            issueId: issue.id,
             pipelineId: pipeline.id,
             position: 0,
         }
     };
-    console.log("pipeline:", pipeline);
     const query = `
         mutation MoveIssue($input: MoveIssueInput!) {
-            moveIssue(
-                input: $input
-            ) {
+            moveIssue(input: $input) {
                 issue {
                     id
                 }
             }
         }
     `;
-    const result = await graphqlWithAuth(query, variables);
-    console.log("move:", result);
-
-    return result;
+    await graphqlWithAuth(query, variables);
 };
 
 async function process() {
     try {
         const workspaces = await getWorkspaces();
+        const issue = await getIssue();
 
         if (workspaces.length === 0) {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
+        }
+
+        if (! issue) {
+            core.setFailed(`Pull request was not found in ZenHub.`);
         }
 
         for (const workspace of workspaces) {
@@ -140,11 +157,17 @@ async function process() {
                 continue;
             }
 
-            await moveToPipeline(pipeline);
+            if (issue.pipeline.name === pipeline.name) {
+                console.log(`Pull request #${payload.pull_request.id} is already in pipeline "${pipeline.name}" in workspace "${workspace.name}".`);
+
+                continue;
+            }
+
+            await moveIssueToPipeline(issue, pipeline);
 
             core.setOutput("pull-request-id", payload.id);
             core.setOutput("pipeline", pipeline.name);
-            console.log(`Moved pull request #${payload.id} to pipeline "${pipeline.name}" in workspace "${workspace.name}".`);
+            console.log(`Moved pull request #${payload.pull_request.id} to pipeline "${pipeline.name}" in workspace "${workspace.name}".`);
         }
     } catch (error) {
         core.setFailed(error.message);
