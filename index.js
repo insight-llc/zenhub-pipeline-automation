@@ -97,13 +97,6 @@ async function getWorkspaces() {
                 nodes {
                     id
                     name
-                    repositoriesConnection {
-                        nodes {
-                                id
-                                name
-                            }
-                        }
-                    }
                 }
             }
         }
