@@ -64,7 +64,7 @@ async function getPipelines(workspaceId) {
         }
     `;
     const result = await graphqlWithAuth(query, variables);
-
+console.log("workspace", result);
     return result
         .workspace
         .pipelines;
