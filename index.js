@@ -43,7 +43,7 @@ async function getIssueId() {
         }
     `;
     const result = await graphqlWithAuth(query, variables);
-
+console.log("issue:", result);
     return result
         .issueByInfo
         .id;
@@ -84,7 +84,7 @@ async function getWorkspaces() {
         }
     `;
     const result = await graphqlWithAuth(query);
-
+console.log("workspaces:", result);
     return result
         .viewer
         .searchWorkspaces
@@ -115,8 +115,10 @@ async function moveToPipeline(pipeline) {
             }
         }
     `;
+    const result = await graphqlWithAuth(query, variables);
+    console.log("move:", result);
 
-    return await graphqlWithAuth(query, variables);
+    return result;
 };
 
 async function process() {
