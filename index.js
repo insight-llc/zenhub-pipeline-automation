@@ -36,10 +36,10 @@ function getConfiguredPipeline(pipelines) {
         .value();
 }
 
-function getMappedPipeline(workspace, pipelines) {
+function getMappedPipeline(pipelines) {
     const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
 
-    return _.chain(mapping || [])
+    const pipeline = _.chain(mapping || [])
         .reduce(function (name, pipeline, key) {
             if (
                 (payload.pull_request.draft
@@ -52,6 +52,11 @@ function getMappedPipeline(workspace, pipelines) {
             return name;
         }, undefined)
         .value();
+
+    return pipeline
+        && _.has(pipelines, pipeline)
+        ? pipeline
+        : undefined;
 }
 
 async function getIssue() {
@@ -147,8 +152,8 @@ async function process() {
         const issue = await getIssue();
         const workspace = await getWorkspace();
         const pipelines = workspace.pipelinesConnection.nodes;
-        const pipeline = getMappedPipeline(workspace, pipelines)
-            || getConfiguredPipeline(workspace, pipelines);
+        const pipeline = getMappedPipeline(pipelines)
+            || getConfiguredPipeline(pipelines);
 
         if (! workspace) {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
