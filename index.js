@@ -1,3 +1,4 @@
+const _ = require("lodash");
 const core = require("@actions/core");
 const github = require("@actions/github");
 const JSON5 = require("json5");
@@ -18,16 +19,39 @@ import("@octokit/graphql")
         process();
     });
 
-async function getConfiguredPipeline(workspace) {
-    const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
-    const configuredPipeline = mapping[payload.pull_request.state];
-    const pipelines = await getPipelines(workspace.id);
-    const pipeline = pipelines
-        .find(function (workspacePipeline) {
-            return workspacePipeline.name === configuredPipeline;
-        });
+function getConfiguredPipeline(pipelines) {
+    return _.chain(pipelines)
+        .reduce(function (name, pipeline) {
+            if (
+                (payload.pull_request.draft
+                    && pipeline.stage === "DEVELOPMENT")
+                || (! payload.pull_request.draft
+                    && pipeline.stage === "REVIEW")
+            ) {
+                return pipeline.name;
+            }
 
-    return pipeline;
+            return name;
+        }, undefined)
+        .value();
+}
+
+function getMappedPipeline(workspace, pipelines) {
+    const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
+
+    return _.chain(mapping || [])
+        .reduce(function (name, pipeline, key) {
+            if (
+                (payload.pull_request.draft
+                    && key === "draft")
+                || payload.pull_request.state === key
+            ) {
+                return pipeline.name;
+            }
+
+            return name;
+        }, undefined)
+        .value();
 }
 
 async function getIssue() {
@@ -67,28 +91,7 @@ async function getIssue() {
     };
 }
 
-async function getPipelines(workspaceId) {
-    const variables = {
-        workspaceId: workspaceId,
-    };
-    const query = `
-        query ($workspaceId: ID!) {
-            workspace(id: $workspaceId) {
-                pipelines {
-                    id
-                    name
-                }
-            }
-        }
-    `;
-    const result = await graphqlWithAuth(query, variables);
-
-    return result
-        .workspace
-        .pipelines;
-}
-
-async function getWorkspaces() {
+async function getWorkspace() {
     const query = `
         query {
             viewer {
@@ -97,6 +100,14 @@ async function getWorkspaces() {
                 nodes {
                     id
                     name
+                    pipelinesConnection {
+                        nodes {
+                                id
+                                name
+                                stage
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -106,7 +117,8 @@ async function getWorkspaces() {
     return result
         .viewer
         .searchWorkspaces
-        .nodes;
+        .nodes[0]
+        || {};
 }
 
 async function moveIssueToPipeline(issue, pipeline) {
@@ -132,10 +144,13 @@ async function moveIssueToPipeline(issue, pipeline) {
 
 async function process() {
     try {
-        const workspaces = await getWorkspaces();
         const issue = await getIssue();
+        const workspace = await getWorkspace();
+        const pipelines = workspace.pipelinesConnection.nodes;
+        const pipeline = getMappedPipeline(workspace, pipelines)
+            || getConfiguredPipeline(workspace, pipelines);
 
-        if (workspaces.length === 0) {
+        if (! workspace) {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
         }
 
@@ -143,27 +158,21 @@ async function process() {
             core.setFailed(`Pull request was not found in ZenHub.`);
         }
 
-        for (const workspace of workspaces) {
-            const pipeline = await getConfiguredPipeline(workspace);
-
-            if (! pipeline) {
-                continue;
-            }
-
-            if (issue.pipeline.name === pipeline.name) {
-                console.log(`Pull request #${payload.pull_request.number} is already in pipeline "${pipeline.name}" in workspace "${workspace.name}". No action taken.`);
-
-                continue;
-            }
-
-            await moveIssueToPipeline(issue, pipeline);
-
-            core.setOutput("zenhub-issue-id", issue.id);
-            core.setOutput("zenhub-pipeline-id", pipeline.id);
-            core.setOutput("zenhub-pipeline-name", pipeline.name);
-            core.setOutput("zenhub-workspace-id", workspace.id);
-            console.log(`Moved pull request #${payload.pull_request.id} to pipeline "${pipeline.name}" in workspace "${workspace.name}".`);
+        if (! pipeline) {
+            core.setFailed(`No ZenHub pipeline was not found.`);
         }
+
+        if (issue.pipeline.name === pipeline.name) {
+            console.log(`Pull request #${payload.pull_request.number} is already in pipeline "${pipeline.name}" in workspace "${workspace.name}". No action taken.`);
+        }
+
+        await moveIssueToPipeline(issue, pipeline);
+
+        core.setOutput("zenhub-issue-id", issue.id);
+        core.setOutput("zenhub-pipeline-id", pipeline.id);
+        core.setOutput("zenhub-pipeline-name", pipeline.name);
+        core.setOutput("zenhub-workspace-id", workspace.id);
+        console.log(`Moved pull request #${payload.pull_request.id} to pipeline "${pipeline.name}" in workspace "${workspace.name}".`);
     } catch (error) {
         core.setFailed(error.message);
     }

@@ -7,10 +7,10 @@ inputs:
   zenhub-workspace:
     description: "ZenHub workspace name."
     required: true
-  pull-request-state-mapping:
-    description: "Provide a mapping between Pull Request status and the corresponding ZenHub Pipeline you want to move the issue to. Possible statuses are: open, closed, merged, commented, changes_requested, approved, dismissed."
-    required: true
-    default: '{open: "In Progress"}'
+  # pull-request-state-mapping:
+  #   description: "Provide a mapping between Pull Request status and the corresponding ZenHub Pipeline you want to move the issue to. Possible statuses are: open, closed, merged, commented, changes_requested, approved, dismissed."
+  #   required: true
+  #   default: '{open: "In Progress"}'
 outputs:
   zenhub-issue-id:
     description: "The ZenHub ID of the pull request."
