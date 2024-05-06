@@ -93,20 +93,24 @@ async function getWorkspaces() {
 
 async function moveToPipeline(pipeline) {
     const variables = {
+        clientMutationId: "test",
         issueId: await getIssueId(),
         pipelineId: pipeline.id,
         position: 0,
     };
     console.log("pipeline:", pipeline);
     const query = `
-        mutation ($issueId: ID!, $pipelineId: ID!, $position: Int!) {
-            moveIssueToPipelineAndPosition(input: {issueId: $issueId, pipelineId: $pipelineId, position: $position}) {
+        mutation MoveIssue {
+            moveIssue(
+                input: {
+                    clientMutationId: $clientMutationId
+                    pipelineId: $pipelineId
+                    issueId: $issueId
+                    position: $position
+                }
+            ) {
                 issue {
-                    id
-                    title
-                    pipeline {
-                        name
-                    }
+                    body
                 }
             }
         }
