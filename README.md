@@ -6,9 +6,12 @@ This GitHub Action automates the movement of issues between different ZenHub Pip
 
 The following inputs are available for the ZenHub Pipeline Automation GitHub Action:
 
-- `zenhub-graphql-personal-api-key`: Your ZenHub API token.
-- `zenhub-workspace`: The name of your ZenHub workspace.
-- `pull-request-state-mapping`: A mapping of Pull Request statuses to the corresponding ZenHub Pipelines.
+- `zenhub-graphql-personal-api-key`: (required) Your ZenHub API token.
+- `zenhub-workspace`: (required) The name of your ZenHub workspace.
+- `pull-request-state-mapping`: (optional) A mapping of Pull Request statuses to the corresponding ZenHub Pipelines. Possible statuses are: `draft`, `open`, `closed`, `merged`, `commented`, `changes_requested`, `approved`, or `dismissed`. If not provided, this action will use your pipeline stages as configured in your ZenHub workspace:
+  - draft, open => In Progress
+  - reviews_requested, changes_requested => In Review
+  - closed, merged => Completed
 
 ## Usage
 

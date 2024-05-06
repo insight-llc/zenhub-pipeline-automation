@@ -22,9 +22,14 @@ import("@octokit/graphql")
 function getConfiguredPipeline(pipelines) {
     return _.chain(pipelines)
         .filter(function (pipeline) {
-            return (payload.pull_request.draft
+            // - draft, open => In Progress
+            // - reviews_requested, changes_requested => In Review
+            // - closed, merged => Completed
+
+            return (payload.pull_request.state === "open"
                     && pipeline.stage === "DEVELOPMENT")
-                || (! payload.pull_request.draft
+                || ((payload.pull_request.requested_reviewers.length + payload.pull_request.requested_teams.length > 0
+                        || payload.pull_request.review_requested.length > 0)
                     && pipeline.stage === "REVIEW");
         })
         .value();
@@ -144,7 +149,7 @@ async function process() {
         const pipelines = workspace.pipelinesConnection.nodes;
         const pipeline = getMappedPipeline(pipelines)
             || getConfiguredPipeline(pipelines);
-
+console.log(payload);
         if (! workspace) {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
         }
