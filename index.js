@@ -52,7 +52,7 @@ function getMappedPipeline(pipelines) {
             return name;
         }, undefined)
         .value();
-
+console.log(pipeline, pipelines, _.find(pipelines, {"name": pipeline}));
     return _.find(pipelines, {"name": pipeline});
 }
 
