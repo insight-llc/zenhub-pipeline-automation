@@ -64,7 +64,7 @@ async function getPipelines(workspaceId) {
         }
     `;
     const result = await graphqlWithAuth(query, variables);
-console.log("workspace", result);
+console.log("workspace:", result);
     return result
         .workspace
         .pipelines;
@@ -79,20 +79,14 @@ async function getWorkspaces() {
                 nodes {
                     id
                     name
-                    repositoriesConnection {
-                        nodes {
-                                id
-                                name
-                            }
-                        }
-                    }
                 }
             }
         }
     `;
     const result = await graphqlWithAuth(query);
 
-    return result.viewer
+    return result
+        .viewer
         .searchWorkspaces
         .nodes;
 }
@@ -103,7 +97,7 @@ async function moveToPipeline(pipeline) {
         pipelineId: pipeline.id,
         position: 0,
     };
-    console.log(pipeline);
+    console.log("pipeline:", pipeline);
     const query = `
         mutation ($issueId: ID!, $pipelineId: ID!, $position: Int!) {
             moveIssueToPipelineAndPosition(input: {issueId: $issueId, pipelineId: $pipelineId, position: $position}) {
@@ -136,7 +130,7 @@ async function process() {
                 continue;
             }
 
-            await moveToPipeline(workspace, pipeline);
+            await moveToPipeline(pipeline);
 
             core.setOutput("pull-request-id", payload.id);
             core.setOutput("pipeline", pipeline.name);
