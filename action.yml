@@ -10,12 +10,16 @@ inputs:
   pull-request-state-mapping:
     description: "Provide a mapping between Pull Request status and the corresponding ZenHub Pipeline you want to move the issue to. Possible statuses are: open, closed, merged, commented, changes_requested, approved, dismissed."
     required: true
-    default: "merged: 'Closed'"
+    default: '{open: "In Progress"}'
 outputs:
-  pull-request-id:
-    description: "The ID of the pull request that has been moved."
-  pipeline:
-    description: "The name of the ZenHub pipeline that the pull request was moved to."
+  zenhub-issue-id:
+    description: "The ZenHub ID of the pull request."
+  zenhub-pipeline-id:
+    description: "The ZenHub Pipeline ID."
+  zenhub-pipeline-name:
+    description: "The ZenHub Pipeline name."
+  zenhub-workspace-id:
+    description: "The Zenhub ID of the referenced workspace."
 runs:
   using: "node20"
   main: "index.js"

@@ -1,23 +1,34 @@
 # Hello world javascript action
 
-This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+This action sets up automatic issue movement between different ZenHub Pipelines depending on what's happening with the PR.
 
 ## Inputs
 
-### `who-to-greet`
-
-**Required** The name of the person to greet. Default `"World"`.
+|Field | Required |Description |
+|----- | ----- |----- |
+|zenhub-graphql-personal-api-key | ✅ |ZenHub API token. |
+|zenhub-workspace | ✅ |ZenHub workspace name. |
+|pull-request-state-mapping | ✅ |Provide a mapping between Pull Request status and the corresponding ZenHub Pipeline you want to move the issue to. Possible statuses are: open, closed, merged, commented, changes_requested, approved, dismissed. |
 
 ## Outputs
 
-### `time`
+|Field |Description |
+|---------- |----- |
+|zenhub-issue-id |The ZenHub ID of the pull request. |
+|zenhub-pipeline-id |The ZenHub Pipeline ID. |
+|zenhub-pipeline-name |The ZenHub Pipeline name. |
+|zenhub-workspace-id |The Zenhub ID of the referenced workspace. |
 
-The time we greeted you.
-
-## Example usage
+## Example
 
 ```yaml
-uses: actions/hello-world-javascript-action@e76147da8e5c81eaf017dede5645551d4b94427b
-with:
-  who-to-greet: 'Mona the Octocat'
+    - uses: insight-llc/zenhub-pipeline-automation@main
+        with:
+        zenhub-graphql-personal-api-key: ${{ secrets.ZENHUB_GRAPHQL_PERSONAL_API_KEY }}
+        zenhub-workspace: "My Team"
+        pull-request-state-mapping: |
+            {
+                "changes_requested": "In Cleanup",
+                "open": "In Progress",
+            }
 ```

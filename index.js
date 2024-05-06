@@ -165,8 +165,10 @@ async function process() {
 
             await moveIssueToPipeline(issue, pipeline);
 
-            core.setOutput("pull-request-id", payload.id);
-            core.setOutput("pipeline", pipeline.name);
+            core.setOutput("zenhub-issue-id", issue.id);
+            core.setOutput("zenhub-pipeline-id", pipeline.id);
+            core.setOutput("zenhub-pipeline-name", pipeline.name);
+            core.setOutput("zenhub-workspace-id", workspace.id);
             console.log(`Moved pull request #${payload.pull_request.id} to pipeline "${pipeline.name}" in workspace "${workspace.name}".`);
         }
     } catch (error) {
