@@ -155,7 +155,7 @@ async function process() {
         const pipelines = workspace.pipelinesConnection.nodes;
         const pipeline = getMappedPipeline(pipelines)
             || getConfiguredPipeline(pipelines);
-console.log(payload);
+
         if (! workspace) {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
         }
