@@ -4,13 +4,13 @@ const github = require("@actions/github");
 const JSON5 = require("json5");
 
 const payload = github.context.payload;
-const action = github.context.action;
+const event = github.context.eventName;
 const state = (payload.review || {}).state
     || (payload.pull_request || {}).state;
 let graphql;
 let graphqlWithAuth;
 
-console.log(`"${action}" action triggered with state "${state}".`);
+console.log(`"${event}" event registered with state "${state}".`);
 
 import("@octokit/graphql")
     .then((octokit) => {
