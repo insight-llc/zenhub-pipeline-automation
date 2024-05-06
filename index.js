@@ -47,7 +47,7 @@ console.log("mapping: ", mapping);
                     && key === "draft")
                 || payload.pull_request.state === key
             ) {
-                return pipeline.name;
+                return pipeline;
             }
 
             return name;
