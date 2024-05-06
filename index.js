@@ -43,13 +43,10 @@ async function getIssueId() {
         }
     `;
     const result = await graphqlWithAuth(query, variables);
-console.log("issue:", result);
 
-    return result;
-    // return result
-    //     .data
-    //     .issueByInfo
-    //     .id;
+    return result
+        .issueByInfo
+        .id;
 }
 
 async function getPipelines(workspaceId) {
