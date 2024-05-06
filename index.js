@@ -158,7 +158,7 @@ async function process() {
             }
 
             if (issue.pipeline.name === pipeline.name) {
-                console.log(`Pull request #${payload.pull_request.id} is already in pipeline "${pipeline.name}" in workspace "${workspace.name}".`);
+                console.log(`Pull request #${payload.pull_request.number} is already in pipeline "${pipeline.name}" in workspace "${workspace.name}". No action taken.`);
 
                 continue;
             }
