@@ -21,24 +21,17 @@ import("@octokit/graphql")
 
 function getConfiguredPipeline(pipelines) {
     return _.chain(pipelines)
-        .reduce(function (name, pipeline) {
-            if (
-                (payload.pull_request.draft
+        .filter(function (pipeline) {
+            return (payload.pull_request.draft
                     && pipeline.stage === "DEVELOPMENT")
                 || (! payload.pull_request.draft
-                    && pipeline.stage === "REVIEW")
-            ) {
-                return pipeline.name;
-            }
-
-            return name;
-        }, undefined)
+                    && pipeline.stage === "REVIEW");
+        })
         .value();
 }
 
 function getMappedPipeline(pipelines) {
     const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
-console.log("mapping: ", mapping);
     const pipeline = _.chain(mapping || [])
         .reduce(function (name, pipeline, key) {
             console.log(key, pipeline, payload.pull_request.draft, payload.pull_request.state);
@@ -53,7 +46,7 @@ console.log("mapping: ", mapping);
             return name;
         }, undefined)
         .value();
-console.log(pipeline, pipelines, _.find(pipelines, {"name": pipeline}));
+
     return _.find(pipelines, {"name": pipeline});
 }
 
@@ -167,6 +160,8 @@ async function process() {
 
         if (issue.pipeline.name === pipeline.name) {
             console.log(`Pull request #${payload.pull_request.number} is already in pipeline "${pipeline.name}" in workspace "${workspace.name}". No action taken.`);
+
+            return;
         }
 
         await moveIssueToPipeline(issue, pipeline);
