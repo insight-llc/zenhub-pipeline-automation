@@ -34,7 +34,6 @@ function getMappedPipeline(pipelines) {
     const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
     const pipeline = _.chain(mapping || [])
         .reduce(function (name, pipeline, key) {
-            console.log(key, pipeline, payload.pull_request.draft, payload.pull_request.state);
             if (
                 (payload.pull_request.draft
                     && key === "draft")
@@ -170,6 +169,7 @@ async function process() {
         core.setOutput("zenhub-pipeline-id", pipeline.id);
         core.setOutput("zenhub-pipeline-name", pipeline.name);
         core.setOutput("zenhub-workspace-id", workspace.id);
+
         console.log(`Moved pull request #${payload.pull_request.id} to pipeline "${pipeline.name}" in workspace "${workspace.name}".`);
     } catch (error) {
         core.setFailed(error.message);
