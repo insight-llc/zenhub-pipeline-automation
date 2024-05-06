@@ -38,7 +38,7 @@ function getConfiguredPipeline(pipelines) {
 
 function getMappedPipeline(pipelines) {
     const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
-
+console.log("mapping: ", mapping);
     const pipeline = _.chain(mapping || [])
         .reduce(function (name, pipeline, key) {
             console.log(key, pipeline.name, payload.pull_request.draft, payload.pull_request.state);
