@@ -46,7 +46,7 @@ function getMappedPipeline(pipelines) {
             if (
                 (payload.pull_request.draft
                     && key === "draft")
-                (payload.pull_request.requested_reviewers.length + payload.pull_request.requested_teams.length > 0
+                || (payload.pull_request.requested_reviewers.length + payload.pull_request.requested_teams.length > 0
                     && key === "reviews_requested")
                 || payload.pull_request.state === key
             ) {
