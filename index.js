@@ -19,9 +19,7 @@ import("@octokit/graphql")
     });
 
 async function getConfiguredPipeline(workspace) {
-    console.log("input", typeof core.getInput("pull-request-state-mapping"), core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
     const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
-    console.log("pullRequestState", payload.pull_request.state, mapping, typeof mapping);
     const configuredPipeline = mapping[payload.pull_request.state];
     const pipelines = await getPipelines(workspace.id);
     const pipeline = pipelines
@@ -83,9 +81,10 @@ async function getWorkspaces() {
 async function moveToPipeline(pipeline) {
     const variables = {
         issueId: payload.pull_request.id,
-        pipeline: pipeline.id,
-        position: "top",
+        pipelineId: pipeline.id,
+        position: 0,
     };
+    console.log(issueId, pipelineId, position);
     const query = `
         mutation ($issueId: ID!, $pipelineId: ID!, $position: Int!) {
             moveIssueToPipelineAndPosition(input: {issueId: $issueId, pipelineId: $pipelineId, position: $position}) {
@@ -112,15 +111,13 @@ async function process() {
         }
 
         for (const workspace of workspaces) {
-            // const pullRequestState = ;
-            // console.log(payload);
             const pipeline = await getConfiguredPipeline(workspace);
-console.log("pipeline", pipeline);
+
             if (! pipeline) {
                 continue;
             }
 
-            moveToPipeline(workspace, pipeline);
+            await moveToPipeline(workspace, pipeline);
 
             core.setOutput("pull-request-id", payload.id);
             core.setOutput("pipeline", pipeline.name);
