@@ -22,7 +22,8 @@ The following inputs are available for the ZenHub Pipeline Automation GitHub Act
     name: ZenHub Pipeline Automation
 
     on:
-    pull_request
+        - pull_request
+        - pull_request_review
 
     jobs:
     zenhub_automation:
@@ -51,7 +52,8 @@ The following inputs are available for the ZenHub Pipeline Automation GitHub Act
 ```json
 {
   "draft": "In Development",
-  "open": "In Review",
+  "open": "In Development",
+  "reviews_requested": "In Review",
   "closed": "Closed"
 }
 ```
