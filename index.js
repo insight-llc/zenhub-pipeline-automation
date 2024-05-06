@@ -103,7 +103,7 @@ async function moveToPipeline(pipeline) {
         pipelineId: pipeline.id,
         position: 0,
     };
-    console.log(payload, variables);
+    console.log(pipeline);
     const query = `
         mutation ($issueId: ID!, $pipelineId: ID!, $position: Int!) {
             moveIssueToPipelineAndPosition(input: {issueId: $issueId, pipelineId: $pipelineId, position: $position}) {
