@@ -30,6 +30,26 @@ async function getConfiguredPipeline(workspace) {
     return pipeline;
 }
 
+async function getIssueId() {
+    const variables = {
+        "issueNumber": payload.pull_request.number,
+        "repositoryGhId": payload.repository.id,
+    };
+    const query = `
+        query ($repositoryGhId: Int, $issueNumber: Int!) {
+            issueByInfo(issueNumber: $issueNumber, repositoryGhId: $repositoryGhId) {
+                id
+            }
+        }
+    `;
+    const result = await graphqlWithAuth(query, variables);
+console.log("issue:", result);
+    return result
+        .data
+        .issueByInfo
+        .id;
+}
+
 async function getPipelines(workspaceId) {
     const variables = {
         workspaceId: workspaceId,
@@ -80,7 +100,7 @@ async function getWorkspaces() {
 
 async function moveToPipeline(pipeline) {
     const variables = {
-        issueId: payload.pull_request.id,
+        issueId: await getIssueId(),
         pipelineId: pipeline.id,
         position: 0,
     };
