@@ -3,9 +3,14 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const JSON5 = require("json5");
 
-let payload = github.context.payload;
+const payload = github.context.payload;
+const action = github.context.action;
+const state = (payload.review || {}).state
+    || (payload.pull_request || {}).state;
 let graphql;
 let graphqlWithAuth;
+
+console.log(`"${action}" action triggered with state "${state}".`);
 
 import("@octokit/graphql")
     .then((octokit) => {
@@ -22,14 +27,13 @@ import("@octokit/graphql")
 function getConfiguredPipeline(pipelines) {
     return _.chain(pipelines)
         .filter(function (pipeline) {
-            // - draft, open => In Progress
-            // - reviews_requested, changes_requested => In Review
-            // - closed, merged => Completed
-
-            return (payload.pull_request.state === "open"
+            return ((payload.pull_request.draft
+                        || state === "open"
+                        || state === "changes_requested"
+                        || state === "dismissed")
                     && pipeline.stage === "DEVELOPMENT")
                 || ((payload.pull_request.requested_reviewers.length + payload.pull_request.requested_teams.length > 0
-                        || payload.pull_request.review_requested.length > 0)
+                        || state === "approved")
                     && pipeline.stage === "REVIEW");
         })
         .value();
@@ -42,6 +46,8 @@ function getMappedPipeline(pipelines) {
             if (
                 (payload.pull_request.draft
                     && key === "draft")
+                (payload.pull_request.requested_reviewers.length + payload.pull_request.requested_teams.length > 0
+                    && key === "reviews_requested")
                 || payload.pull_request.state === key
             ) {
                 return pipeline;
