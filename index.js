@@ -33,7 +33,11 @@ import("@octokit/graphql")
             debug: true,
         });
         process();
-    });
+    })
+    .catch((error) => {
+        console.error(error);
+        // process.exit(1);
+    });;
 
 function getConfiguredPipeline(pipelines) {
     return _.chain(pipelines)
