@@ -246,6 +246,7 @@ async function moveIssueToPipeline(issue, pipeline) {
             }
         }
     `;
+    console.log(query, variables);
     await graphqlWithZenHubAuth(query, variables);
 };
 
