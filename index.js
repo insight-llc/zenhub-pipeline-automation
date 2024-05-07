@@ -107,7 +107,7 @@ async function getIssue() {
 
 async function getPullRequest() {
     const variables = {
-        "repositoryOwner": payload.repository.owner,
+        "repositoryOwner": payload.repository.owner.login,
         "repositoryName": payload.repository.name,
         "pullRequestNumber": payload.pull_request.number,
     };
