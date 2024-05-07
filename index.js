@@ -58,6 +58,7 @@ function getConfiguredPipeline(pipelines, state) {
 
             return result;
         })
+        .first()
         .value();
 }
 
