@@ -280,7 +280,7 @@ async function process() {
 
             return;
         }
-
+console.log("pipeline: ", pipeline);
         await moveIssueToPipeline(zenHubPullRequest, pipeline);
 
         core.setOutput("zenhub-issue-id", zenHubPullRequest.id);
