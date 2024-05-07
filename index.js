@@ -131,7 +131,9 @@ async function getGitHubPullRequest() {
     `;
     const result = await graphqlWithGitHubAuth(query, variables);
 
-    return result;
+    return result
+        .repository
+        .pullRequest;
 }
 
 function getState(pullRequest) {
