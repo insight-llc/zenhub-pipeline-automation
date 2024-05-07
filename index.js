@@ -119,8 +119,8 @@ async function getPullRequest() {
         "pullRequestNumber": payload.pull_request.number,
     };
     const query = `
-        query ($repositoryOwner: String!, $repositoryName: String!, $pullRequestNumber: Int!) {
-            repository(owner: $repositoryOwner, name: $repositoryName) {
+        query {
+            repository(owner: ${payload.repository.owner.login}, name: ${payload.repository.name}) {
                 id
             }
         }
