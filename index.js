@@ -97,6 +97,27 @@ async function getIssue() {
     };
 }
 
+async function getPullRequest() {
+    const variables = {
+        "repositoryOwner": payload.repository.owner,
+        "repositoryName": payload.repository.name,
+        "pullRequestNumber": payload.pull_request.number,
+    };
+    const query = `
+        query ($repositoryOwner: String!, $repositoryName: String!, $pullRequestNumber: Int!) {
+            repository(owner: $repositoryOwner, name: $repositoryName) {
+                pullRequest(number: $pullRequestNumber) {
+                    id
+                    //... other fields
+                }
+            }
+        }
+    `;
+    const result = await graphql(query, variables);
+console.log(pullRequest, result);
+    return result.repository.pullRequest;
+}
+
 async function getWorkspace() {
     const query = `
         query {
@@ -150,6 +171,7 @@ async function moveIssueToPipeline(issue, pipeline) {
 
 async function process() {
     try {
+        const pullRequest = await getPullRequest();
         const issue = await getIssue();
         const workspace = await getWorkspace();
         const pipelines = workspace.pipelinesConnection.nodes;
