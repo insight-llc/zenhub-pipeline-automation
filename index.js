@@ -18,12 +18,10 @@ import("@octokit/graphql")
     .then((octokit) => {
         graphqlGitHub = octokit.graphql;
         graphqlWithGitHubAuth = graphqlGitHub.defaults({
-            "Content-Type": "application/json",
             baseUrl: "https://api.github.com/graphql",
             headers: {
                 authorization: `Bearer ${core.getInput("github-token")}`,
             },
-            debug: true,
         });
         console.log("length: ", core.getInput("github-token").length);
         graphqlZenHub = octokit.graphql;
@@ -32,7 +30,6 @@ import("@octokit/graphql")
             headers: {
                 authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
             },
-            debug: true,
         });
         process();
     });
