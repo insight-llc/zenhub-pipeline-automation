@@ -8,8 +8,8 @@ const event = github.context.eventName;
 const state = (payload.review || {}).state
     || (payload.pull_request || {}).state;
 let graphql;
-let graphqlGitHubWithAuth;
-let graphqlZenHubWithAuth;
+let graphqlWithGitHubAuth;
+let graphqlWithZenHubAuth;
 
 console.log(`"${event}" event registered with state "${state}".`);
 
