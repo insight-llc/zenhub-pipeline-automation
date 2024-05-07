@@ -117,8 +117,12 @@ async function getGitHubPullRequest() {
                     number
                     id
                     state
+                    merged
                     isDraft
                     reviewDecision
+                    comments {
+                        totalCount
+                    }
                     statusCheckRollup {
                         state
                     }
@@ -147,9 +151,28 @@ async function getGitHubPullRequest() {
 }
 
 function getState(pullRequest) {
+    // `draft`, `open`, `closed`, `merged`, `commented`, `reviews_requested`, `changes_requested`, `approved`, or `dismissed`
     console.log("pull request:", pullRequest);
     if (pullRequest.isDraft) {
         return "draft";
+    }
+
+    if (pullRequest.merged) {
+        return "merged";
+    }
+
+    if (pullRequest.reviewDecision === "CHANGES_REQUESTED") {
+        return "changes_requested";
+    }
+
+    if (pullRequest.reviewDecision === "APPROVED") {
+        return "approved";
+    }
+
+    if (pullRequest.reviews.length > 0) {
+        if (false) {
+            return "dismissed";
+        }
     }
 
     if (
@@ -159,8 +182,8 @@ function getState(pullRequest) {
         return "reviews_requested";
     }
 
-    if (pullRequest.pullRequest.reviews.nodes.length > 0) {
-        return pullRequest.pullRequest.reviews.nodes[0].state;
+    if (pullRequest.comments.totalCount > 0) {
+        return "commented";
     }
 
     return pullRequest.state.toLowerCase();
