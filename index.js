@@ -19,7 +19,7 @@ import("@octokit/graphql")
         graphqlWithGitHubAuth = graphql.defaults({
             baseUrl: "https://api.github.com/graphql",
             headers: {
-                authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                authorization: `Bearer ${core.GITHUB_TOKEN}`,
             },
         });
         graphqlWithZenHubAuth = graphql.defaults({
