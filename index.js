@@ -8,14 +8,21 @@ const event = github.context.eventName;
 const state = (payload.review || {}).state
     || (payload.pull_request || {}).state;
 let graphql;
-let graphqlWithAuth;
+let graphqlGitHubWithAuth;
+let graphqlZenHubWithAuth;
 
 console.log(`"${event}" event registered with state "${state}".`);
 
 import("@octokit/graphql")
     .then((octokit) => {
         graphql = octokit.graphql;
-        graphqlWithAuth = graphql.defaults({
+        graphqlWithGitHubAuth = graphql.defaults({
+            baseUrl: "https://api.github.com/graphql",
+            headers: {
+                authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            },
+        });
+        graphqlWithZenHubAuth = graphql.defaults({
             baseUrl: "https://api.zenhub.com/public",
             headers: {
                 authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
@@ -82,7 +89,7 @@ async function getIssue() {
             }
         }
     `;
-    const result = await graphqlWithAuth(query, variables);
+    const result = await graphqlWithZenHubAuth(query, variables);
 
     return {
         "id": result
@@ -113,7 +120,7 @@ async function getPullRequest() {
             }
         }
     `;
-    const result = await graphql(query, variables);
+    const result = await graphqlWithGitHubAuth(query, variables);
 console.log(pullRequest, result);
     return result.repository.pullRequest;
 }
@@ -139,7 +146,7 @@ async function getWorkspace() {
             }
         }
     `;
-    const result = await graphqlWithAuth(query);
+    const result = await graphqlWithZenHubAuth(query);
 
     return result
         .viewer
@@ -166,7 +173,7 @@ async function moveIssueToPipeline(issue, pipeline) {
             }
         }
     `;
-    await graphqlWithAuth(query, variables);
+    await graphqlWithZenHubAuth(query, variables);
 };
 
 async function process() {
