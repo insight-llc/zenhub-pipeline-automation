@@ -24,7 +24,7 @@ import("@octokit/graphql")
             },
             debug: true,
         });
-        console.log(core.getInput("github-token") + "test");
+        console.log("length: ", core.getInput("github-token").length);
         graphqlWithZenHubAuth = graphql.defaults({
             baseUrl: "https://api.zenhub.com/public",
             headers: {
