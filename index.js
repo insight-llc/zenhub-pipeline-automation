@@ -116,7 +116,6 @@ async function getPullRequest() {
             repository(owner: $repositoryOwner, name: $repositoryName) {
                 pullRequest(number: $pullRequestNumber) {
                     id
-                    //... other fields
                 }
             }
         }
