@@ -22,6 +22,7 @@ import("@octokit/graphql")
                 authorization: `Bearer ${core.getInput("github-token")}`,
             },
         });
+        console.log(core.getInput("github-token"));
         graphqlWithZenHubAuth = graphql.defaults({
             baseUrl: "https://api.zenhub.com/public",
             headers: {
@@ -120,8 +121,9 @@ async function getPullRequest() {
             }
         }
     `;
+console.log("query", query, variables);
     const result = await graphqlWithGitHubAuth(query, variables);
-console.log(pullRequest, result);
+console.log("result", pullRequest, result);
     return result.repository.pullRequest;
 }
 
