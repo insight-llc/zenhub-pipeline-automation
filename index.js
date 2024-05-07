@@ -123,7 +123,7 @@ async function getPullRequest() {
 console.log("query", query, variables);
     const result = await graphqlWithGitHubAuth(query, variables);
 console.log("result", pullRequest, result);
-    return result.repository.pullRequest;
+    return result;
 }
 
 async function getWorkspace() {
