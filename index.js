@@ -114,15 +114,25 @@ async function getGitHubPullRequest() {
         query ($repositoryOwner: String!, $repositoryName: String!, $pullRequestNumber: Int!) {
             repository(owner: $repositoryOwner, name: $repositoryName) {
                 pullRequest(number: $pullRequestNumber) {
+                    number
                     id
                     state
                     isDraft
+                    reviewDecision
+                    statusCheckRollup {
+                        state
+                    }
                     reviewRequests {
                         totalCount
                     }
                     reviews(last: 100) {
                         nodes {
+
                             state
+                            createdAt
+                            author {
+                                login
+                            }
                         }
                     }
                 }
@@ -138,11 +148,14 @@ async function getGitHubPullRequest() {
 
 function getState(pullRequest) {
     console.log("pull request:", pullRequest);
-    if (pullRequest.pullRequest.isDraft) {
+    if (pullRequest.isDraft) {
         return "draft";
     }
 
-    if (pullRequest.pullRequest.reviewRequests.nodes.length > 0) {
+    if (
+        pullRequest.reviewRequests.totalCount > 0
+        && pullRequest.reviewDecision === "REVIEW_REQUIRED"
+    ) {
         return "reviews_requested";
     }
 
@@ -150,7 +163,7 @@ function getState(pullRequest) {
         return pullRequest.pullRequest.reviews.nodes[0].state;
     }
 
-    return pullRequest.pullRequest.state;
+    return pullRequest.state.toLowerCase();
 }
 
 async function getWorkspace() {
