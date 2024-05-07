@@ -182,7 +182,8 @@ async function moveIssueToPipeline(issue, pipeline) {
 
 async function process() {
     try {
-        const pullRequest = await getPullRequest();
+        console.log("payload", payload);
+        // const pullRequest = await getPullRequest();
         const issue = await getIssue();
         const workspace = await getWorkspace();
         const pipelines = workspace.pipelinesConnection.nodes;
