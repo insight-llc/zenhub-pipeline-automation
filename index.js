@@ -30,6 +30,7 @@ import("@octokit/graphql")
             headers: {
                 authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
             },
+            debug: true,
         });
         process();
     });
@@ -122,9 +123,8 @@ async function getPullRequest() {
             }
         }
     `;
-console.log("query", query, variables);
     const result = await graphqlWithGitHubAuth(query, variables);
-console.log("result", pullRequest, result);
+console.log("result", result);
     return result;
 }
 
