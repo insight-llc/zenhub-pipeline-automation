@@ -117,9 +117,7 @@ async function getPullRequest() {
     const query = `
         query ($repositoryOwner: String!, $repositoryName: String!, $pullRequestNumber: Int!) {
             repository(owner: $repositoryOwner, name: $repositoryName) {
-                pullRequest(number: $pullRequestNumber) {
-                    id
-                }
+                id
             }
         }
     `;
