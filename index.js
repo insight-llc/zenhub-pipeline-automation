@@ -1,16 +1,11 @@
 const _ = require("lodash");
 const core = require("@actions/core");
-const github = require("@actions/github");
 const JSON5 = require("json5");
 
+const github = require("@actions/github");
 const payload = github.context.payload;
-const event = github.context.eventName;
-const state = (payload.review || {}).state
-    || (payload.pull_request || {}).state;
 let graphqlWithGitHubAuth;
 let graphqlWithZenHubAuth;
-
-console.log(`"${event}" event registered with state "${state}".`);
 
 import("@octokit/graphql")
     .then((octokit) => {
@@ -250,8 +245,11 @@ async function moveIssueToPipeline(issue, pipeline) {
 async function process() {
     try {
         const gitHubPullRequest = await getGitHubPullRequest();
-        const zenHubPullRequest = await getZenHubPullRequest();
         const pullRequestState = getState(gitHubPullRequest);
+
+        console.log(`"${github.context.eventName}" event registered with state "${pullRequestState}".`);
+
+        const zenHubPullRequest = await getZenHubPullRequest();
         const workspace = await getWorkspace();
         const pipelines = workspace.pipelinesConnection.nodes;
         const pipeline = getMappedPipeline(pipelines, pullRequestState)
