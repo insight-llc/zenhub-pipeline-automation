@@ -120,7 +120,7 @@ async function getPullRequest() {
     };
     const query = `
         query {
-            repository(owner: "${payload.repository.owner.login}", name: "${payload.repository.name}") {
+            repository(repositoryId: ${payload.repository.id}) {
                 id
             }
         }
