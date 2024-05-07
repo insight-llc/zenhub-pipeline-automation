@@ -7,8 +7,6 @@ const payload = github.context.payload;
 const event = github.context.eventName;
 const state = (payload.review || {}).state
     || (payload.pull_request || {}).state;
-let graphqlZenHub;
-let graphqlGitHub;
 let graphqlWithGitHubAuth;
 let graphqlWithZenHubAuth;
 
@@ -16,16 +14,15 @@ console.log(`"${event}" event registered with state "${state}".`);
 
 import("@octokit/graphql")
     .then((octokit) => {
-        graphqlGitHub = octokit.graphql;
-        graphqlWithGitHubAuth = graphqlGitHub.defaults({
+        const graphql = octokit.graphql;
+
+        graphqlWithGitHubAuth = graphql.defaults({
             baseUrl: "https://api.github.com",
             headers: {
                 authorization: `Bearer ${core.getInput("github-token")}`,
             },
         });
-        console.log("length: ", core.getInput("github-token").length);
-        graphqlZenHub = octokit.graphql;
-        graphqlWithZenHubAuth = graphqlZenHub.defaults({
+        graphqlWithZenHubAuth = graphql.defaults({
             baseUrl: "https://api.zenhub.com/public",
             headers: {
                 authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
@@ -70,7 +67,7 @@ function getMappedPipeline(pipelines) {
     return _.find(pipelines, {"name": pipeline});
 }
 
-async function getIssue() {
+async function getZenHubPullRequest() {
     const variables = {
         "issueNumber": payload.pull_request.number,
         "repositoryGhId": payload.repository.id,
@@ -107,7 +104,7 @@ async function getIssue() {
     };
 }
 
-async function getPullRequest() {
+async function getGitHubPullRequest() {
     const variables = {
         "repositoryOwner": payload.repository.owner.login,
         "repositoryName": payload.repository.name,
@@ -116,16 +113,42 @@ async function getPullRequest() {
     const query = `
         query ($repositoryOwner: String!, $repositoryName: String!, $pullRequestNumber: Int!) {
             repository(owner: $repositoryOwner, name: $repositoryName) {
-                id
                 pullRequest(number: $pullRequestNumber) {
                     id
+                    state
+                    isDraft
+                    reviewRequests {
+                        totalCount
+                    }
+                    reviews(last: 100) {
+                        nodes {
+                            state
+                        }
+                    }
                 }
             }
         }
     `;
     const result = await graphqlWithGitHubAuth(query, variables);
-console.log("result", result);
+
     return result;
+}
+
+function getState(pullRequest) {
+    console.log("pull request:", pullRequest);
+    if (pullRequest.pullRequest.isDraft) {
+        return "draft";
+    }
+
+    if (pullRequest.pullRequest.reviewRequests.nodes.length > 0) {
+        return "reviews_requested";
+    }
+
+    if (pullRequest.pullRequest.reviews.nodes.length > 0) {
+        return pullRequest.pullRequest.reviews.nodes[0].state;
+    }
+
+    return pullRequest.pullRequest.state;
 }
 
 async function getWorkspace() {
@@ -181,8 +204,9 @@ async function moveIssueToPipeline(issue, pipeline) {
 
 async function process() {
     try {
-        const pullRequest = await getPullRequest();
-        const issue = await getIssue();
+        const gitHubPullRequest = await getGitHubPullRequest();
+        const zenHubPullRequest = await getZenHubPullRequest();
+        const pullRequestState = getState(gitHubPullRequest);
         const workspace = await getWorkspace();
         const pipelines = workspace.pipelinesConnection.nodes;
         const pipeline = getMappedPipeline(pipelines)
@@ -192,7 +216,11 @@ async function process() {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
         }
 
-        if (! issue) {
+        if (! gitHubPullRequest) {
+            core.setFailed(`Pull request was not found in GitHub.`);
+        }
+
+        if (! zenHubPullRequest) {
             core.setFailed(`Pull request was not found in ZenHub.`);
         }
 
@@ -200,15 +228,15 @@ async function process() {
             core.setFailed(`No ZenHub pipeline was not found.`);
         }
 
-        if (issue.pipeline.name === pipeline.name) {
+        if (zenHubPullRequest.pipeline.name === pipeline.name) {
             console.log(`Pull request #${payload.pull_request.number} is already in pipeline "${pipeline.name}" in workspace "${workspace.name}". No action taken.`);
 
             return;
         }
 
-        await moveIssueToPipeline(issue, pipeline);
+        await moveIssueToPipeline(zenHubPullRequest, pipeline);
 
-        core.setOutput("zenhub-issue-id", issue.id);
+        core.setOutput("zenhub-issue-id", zenHubPullRequest.id);
         core.setOutput("zenhub-pipeline-id", pipeline.id);
         core.setOutput("zenhub-pipeline-name", pipeline.name);
         core.setOutput("zenhub-workspace-id", workspace.id);
