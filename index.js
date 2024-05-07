@@ -33,11 +33,7 @@ import("@octokit/graphql")
             debug: true,
         });
         process();
-    })
-    .catch((error) => {
-        console.error(error);
-        // process.exit(1);
-    });;
+    });
 
 function getConfiguredPipeline(pipelines) {
     return _.chain(pipelines)
@@ -119,13 +115,15 @@ async function getPullRequest() {
         "pullRequestNumber": payload.pull_request.number,
     };
     const query = `
-        query {
-            repository(repositoryId: ${payload.repository.id}) {
+        query ($repositoryOwner: String!, $repositoryName: String!, $pullRequestNumber: Int!) {
+            repository(owner: $repositoryOwner, name: $repositoryName) {
                 id
+                pullRequest(number: $pullRequestNumber) {
+                    id
+                }
             }
         }
     `;
-    console.log("query", query);
     const result = await graphqlWithGitHubAuth(query, variables);
 console.log("result", result);
     return result;
