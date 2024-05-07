@@ -22,6 +22,7 @@ import("@octokit/graphql")
             headers: {
                 authorization: `Bearer ${core.getInput("github-token")}`,
             },
+            debug: true,
         });
         console.log(core.getInput("github-token") + "test");
         graphqlWithZenHubAuth = graphql.defaults({
