@@ -31,32 +31,38 @@ import("@octokit/graphql")
         process();
     });
 
-function getConfiguredPipeline(pipelines) {
+function arePullRequestReviews(reviews, state) {
+    const states = _.chain(reviews)
+        .groupBy("author.login")
+        .mapValues((states) => _.maxBy(states, "createdAt").state)
+        .values()
+        .uniq()
+        .value();
+
+    return states.length === 1
+        && states[0] === state;
+}
+
+function getConfiguredPipeline(pipelines, state) {
     return _.chain(pipelines)
         .filter(function (pipeline) {
-            return ((payload.pull_request.draft
+            return ((state === "draft"
                         || state === "open"
                         || state === "changes_requested"
                         || state === "dismissed")
                     && pipeline.stage === "DEVELOPMENT")
-                || ((payload.pull_request.requested_reviewers.length + payload.pull_request.requested_teams.length > 0
+                || ((state === "reviews_requested"
                         || state === "approved")
                     && pipeline.stage === "REVIEW");
         })
         .value();
 }
 
-function getMappedPipeline(pipelines) {
+function getMappedPipeline(pipelines, state) {
     const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
     const pipeline = _.chain(mapping || [])
         .reduce(function (name, pipeline, key) {
-            if (
-                (payload.pull_request.draft
-                    && key === "draft")
-                || (payload.pull_request.requested_reviewers.length + payload.pull_request.requested_teams.length > 0
-                    && key === "reviews_requested")
-                || payload.pull_request.state === key
-            ) {
+            if (state === key) {
                 return pipeline;
             }
 
@@ -151,8 +157,6 @@ async function getGitHubPullRequest() {
 }
 
 function getState(pullRequest) {
-    // `draft`, `open`, `closed`, `merged`, `commented`, `reviews_requested`, `changes_requested`, `approved`, or `dismissed`
-    console.log("pull request:", pullRequest);
     if (pullRequest.isDraft) {
         return "draft";
     }
@@ -169,10 +173,11 @@ function getState(pullRequest) {
         return "approved";
     }
 
-    if (pullRequest.reviews.length > 0) {
-        if (false) {
-            return "dismissed";
-        }
+    if (
+        pullRequest.reviews.nodes.length > 0
+        && arePullRequestReviews(pullRequest.reviews.nodes, "DISMISSED")
+    ) {
+        return "dismissed";
     }
 
     if (
@@ -247,8 +252,8 @@ async function process() {
         const pullRequestState = getState(gitHubPullRequest);
         const workspace = await getWorkspace();
         const pipelines = workspace.pipelinesConnection.nodes;
-        const pipeline = getMappedPipeline(pipelines)
-            || getConfiguredPipeline(pipelines);
+        const pipeline = getMappedPipeline(pipelines, pullRequestState)
+            || getConfiguredPipeline(pipelines, pullRequestState);
 
         if (! workspace) {
             core.setFailed(`No workspaces with the name "${core.getInput("zenhub-workspace")}" found.`);
