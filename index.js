@@ -7,7 +7,8 @@ const payload = github.context.payload;
 const event = github.context.eventName;
 const state = (payload.review || {}).state
     || (payload.pull_request || {}).state;
-let graphql;
+let graphqlZenHub;
+let graphqlGitHub;
 let graphqlWithGitHubAuth;
 let graphqlWithZenHubAuth;
 
@@ -15,8 +16,8 @@ console.log(`"${event}" event registered with state "${state}".`);
 
 import("@octokit/graphql")
     .then((octokit) => {
-        graphql = octokit.graphql;
-        graphqlWithGitHubAuth = graphql.defaults({
+        graphqlGitHub = octokit.graphql;
+        graphqlWithGitHubAuth = graphqlGitHub.defaults({
             "Content-Type": "application/json",
             baseUrl: "https://api.github.com/graphql",
             headers: {
@@ -25,7 +26,8 @@ import("@octokit/graphql")
             debug: true,
         });
         console.log("length: ", core.getInput("github-token").length);
-        graphqlWithZenHubAuth = graphql.defaults({
+        graphqlZenHub = octokit.graphql;
+        graphqlWithZenHubAuth = graphqlZenHub.defaults({
             baseUrl: "https://api.zenhub.com/public",
             headers: {
                 authorization: `Bearer ${core.getInput("zenhub-graphql-personal-api-key")}`,
@@ -182,7 +184,6 @@ async function moveIssueToPipeline(issue, pipeline) {
 
 async function process() {
     try {
-        console.log("payload", payload);
         const pullRequest = await getPullRequest();
         const issue = await getIssue();
         const workspace = await getWorkspace();
