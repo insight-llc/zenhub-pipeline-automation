@@ -1,8 +1,8 @@
 name: "Zenhub Pipeline Automation"
 description: "Automate moving ZenHub cards between pipelines based on Github issue or pull request status."
 inputs:
-  # github-token:
-  #   description: "Github token, usually '${{ secrets.GITHUB_TOKEN }}'."
+  github-token:
+    description: "Github token, usually '${{ secrets.GITHUB_TOKEN }}'."
   pull-request-state-mapping:
     description: "Provide a mapping between Pull Request status and the corresponding ZenHub Pipeline you want to move the issue to. Possible statuses are: open, closed, merged, commented, changes_requested, approved, dismissed."
     required: false
