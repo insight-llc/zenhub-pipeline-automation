@@ -18,7 +18,7 @@ import("@octokit/graphql")
     .then((octokit) => {
         graphqlGitHub = octokit.graphql;
         graphqlWithGitHubAuth = graphqlGitHub.defaults({
-            baseUrl: "https://api.github.com/graphql",
+            baseUrl: "https://api.github.com",
             headers: {
                 authorization: `Bearer ${core.getInput("github-token")}`,
             },
