@@ -54,7 +54,6 @@ function getConfiguredPipeline(pipelines, state) {
                 || ((state === "reviews_requested"
                         || state === "approved")
                     && pipeline.stage === "REVIEW");
-            console.log("configured: ", state, pipeline.stage, result);
 
             return result;
         })
@@ -66,7 +65,6 @@ function getMappedPipeline(pipelines, state) {
     const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
     const pipeline = _.chain(mapping || [])
         .reduce(function (name, pipeline, key) {
-            // console.log("mapped: ", state, pipeline, key, name);
             if (state === key) {
                 return pipeline;
             }
@@ -74,7 +72,7 @@ function getMappedPipeline(pipelines, state) {
             return name;
         }, undefined)
         .value();
-console.log("mapped: ", state, pipeline);
+
     return _.find(pipelines, {"name": pipeline});
 }
 
@@ -232,10 +230,8 @@ async function getWorkspace() {
 async function moveIssueToPipeline(issue, pipeline) {
     const variables = {
         input: {
-            clientMutationId: "test",
             issueId: issue.id,
             pipelineId: pipeline.id,
-            position: 0,
         }
     };
     const query = `
@@ -247,7 +243,7 @@ async function moveIssueToPipeline(issue, pipeline) {
             }
         }
     `;
-    console.log(query, variables);
+
     await graphqlWithZenHubAuth(query, variables);
 };
 
@@ -282,7 +278,7 @@ async function process() {
 
             return;
         }
-console.log("pipeline: ", pipeline);
+
         await moveIssueToPipeline(zenHubPullRequest, pipeline);
 
         core.setOutput("zenhub-issue-id", zenHubPullRequest.id);
