@@ -46,6 +46,7 @@ function arePullRequestReviews(reviews, state) {
 function getConfiguredPipeline(pipelines, state) {
     return _.chain(pipelines)
         .filter(function (pipeline) {
+            console.log("configured: ", state, pipeline.stage);
             return ((state === "draft"
                         || state === "open"
                         || state === "changes_requested"
@@ -62,6 +63,7 @@ function getMappedPipeline(pipelines, state) {
     const mapping = JSON5.parse(core.getInput("pull-request-state-mapping").replace(/\n/g, ''));
     const pipeline = _.chain(mapping || [])
         .reduce(function (name, pipeline, key) {
+            console.log("mapped: ", state, pipeline, key, name);
             if (state === key) {
                 return pipeline;
             }
