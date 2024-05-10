@@ -2,6 +2,8 @@
 
 This GitHub Action automates the movement of issues between different ZenHub Pipelines based on the Pull Request (PR) status. It uses the ZenHub API to manage the issue movement and provides a mapping between PR statuses and the corresponding ZenHub Pipelines.
 
+Further, this action lets us take advantage of the "Done" pipeline, without having to give up using the PR keywords "Fixes", "Closes", or "Resolves", which will move the issue to the Closed pipeline. The action will now move the issue back to the "Done" pipeline, so you can track what needs to be released, even if it is already merged.
+
 ## Configuration
 
 The following inputs are available for the ZenHub Pipeline Automation GitHub Action:
