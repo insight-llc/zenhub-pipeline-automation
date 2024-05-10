@@ -39,6 +39,7 @@ function arePullRequestReviews(reviews, state) {
 }
 
 function getConfiguredPipeline(pipelines, state) {
+    console.log("pipelines: ", pipelines);
     return _.chain(pipelines)
         .filter(function (pipeline) {
             const result = ((state === "draft"
@@ -47,8 +48,10 @@ function getConfiguredPipeline(pipelines, state) {
                         || state === "dismissed")
                     && pipeline.stage === "DEVELOPMENT")
                 || ((state === "reviews_requested"
-                        || state === "approved")
-                    && pipeline.stage === "REVIEW");
+                    && pipeline.stage === "REVIEW")
+                || ((state === "approved"
+                        || state === "merged")
+                    && pipeline.stage === "PRODUCTION"));
 
             return result;
         })
