@@ -41,7 +41,7 @@ function arePullRequestReviews(reviews, state) {
 function getConfiguredPipeline(pipelines, state) {
     return _.chain(pipelines)
         .filter(function (pipeline) {
-            const result = ((state === "draft"
+            return ((state === "draft"
                         || state === "open"
                         || state === "changes_requested"
                         || state === "dismissed")
@@ -51,8 +51,6 @@ function getConfiguredPipeline(pipelines, state) {
                 || ((state === "approved"
                         || state === "merged")
                     && pipeline.stage === "COMPLETED"));
-
-            return result;
         })
         .first()
         .value();
@@ -241,11 +239,13 @@ async function moveIssueToPipeline(issue, pipeline) {
         }
     `;
 
+    if (pipeline.stage === "DEVELOPMENT") {
     await graphqlWithZenHubAuth(query, variables);
 };
 
 async function process() {
     try {
+        let delay = 0;
         const gitHubPullRequest = await getGitHubPullRequest();
         const pullRequestState = getState(gitHubPullRequest);
 
@@ -279,7 +279,16 @@ async function process() {
             return;
         }
 
-        await moveIssueToPipeline(zenHubPullRequest, pipeline);
+        if (pullRequestState === "merged") {
+            delay = 10000;
+        }
+
+        setTimeout(
+            function () {
+                await moveIssueToPipeline(zenHubPullRequest, pipeline);
+            },
+            delay,
+        );
 
         core.setOutput("zenhub-issue-id", zenHubPullRequest.id);
         core.setOutput("zenhub-pipeline-id", pipeline.id);
