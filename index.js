@@ -243,6 +243,10 @@ async function moveIssueToPipeline(issue, pipeline) {
     await graphqlWithZenHubAuth(query, variables);
 };
 
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+    
 async function process() {
     try {
         let delay = 0;
@@ -283,6 +287,7 @@ async function process() {
             delay = 10000;
         }
 
+        await delay(delay);
         await moveIssueToPipeline(zenHubPullRequest, pipeline);
 
         core.setOutput("zenhub-issue-id", zenHubPullRequest.id);
