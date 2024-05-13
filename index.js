@@ -283,12 +283,7 @@ async function process() {
             delay = 10000;
         }
 
-        setTimeout(
-            function () {
-                await moveIssueToPipeline(zenHubPullRequest, pipeline);
-            },
-            delay,
-        );
+        await moveIssueToPipeline(zenHubPullRequest, pipeline);
 
         core.setOutput("zenhub-issue-id", zenHubPullRequest.id);
         core.setOutput("zenhub-pipeline-id", pipeline.id);
