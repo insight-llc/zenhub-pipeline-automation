@@ -240,13 +240,16 @@ async function moveIssueToPipeline(issue, pipeline) {
     `;
 
     if (pipeline.stage === "DEVELOPMENT") {
-    await graphqlWithZenHubAuth(query, variables);
-};
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+        await graphqlWithZenHubAuth(query, variables);
+    };
 }
-    
+
+function wait(milliseconds) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, milliseconds);
+    });
+}
+
 async function process() {
     try {
         let delay = 0;
@@ -287,7 +290,7 @@ async function process() {
             delay = 10000;
         }
 
-        await delay(delay);
+        await wait(delay);
         await moveIssueToPipeline(zenHubPullRequest, pipeline);
 
         core.setOutput("zenhub-issue-id", zenHubPullRequest.id);
