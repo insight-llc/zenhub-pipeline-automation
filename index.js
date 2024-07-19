@@ -240,11 +240,7 @@ async function moveIssueToPipeline(issue, pipeline) {
         }
     `;
 
-    console.log(pipeline);
-
-    if (pipeline.stage === "DEVELOPMENT") {
-        await graphqlWithZenHubAuth(query, variables);
-    };
+    await graphqlWithZenHubAuth(query, variables);
 }
 
 function wait(milliseconds) {
