@@ -39,6 +39,7 @@ function arePullRequestReviews(reviews, state) {
 }
 
 function getConfiguredPipeline(pipelines, state) {
+    console.log(pipelines);
     return _.chain(pipelines)
         .filter(function (pipeline) {
             return ((state === "draft"
